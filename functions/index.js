@@ -3,29 +3,43 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 exports.redirect = functions.https.onRequest(async (req, res) => {
-    // Mengambil slug (misal 'teh') dari URL
-    const slug = req.params.slug || req.path.split('/')[1];
+    // Ambil slug dari parameter atau path
+    const slug = req.params.slug || req.path.split('/').filter(Boolean)[0];
 
-    if (!slug || slug === 'index.html') {
-        return res.redirect('/'); 
+    // Jika user cuma buka domain utama tanpa slug
+    if (!slug || slug === 'index.html' || slug === 'dashboard') {
+        return res.redirect('https://go.sekawan.my.id'); 
     }
 
     try {
-        // Cari di coll 'links' dokumen dengan ID yang sama dengan slug
-        const doc = await admin.firestore().collection("links").doc(slug).get();
+        const db = admin.firestore();
+        const doc = await db.collection("links").doc(slug).get();
 
         if (doc.exists) {
             const data = doc.data();
             
-            // Tambah hit secara background
-            doc.ref.update({ clickCount: admin.firestore.FieldValue.increment(1) });
+            // Catat Klik di Background (async)
+            doc.ref.update({
+                clickCount: admin.firestore.FieldValue.increment(1)
+            }).catch(err => console.error("Update click failed", err));
 
-            // REDIRECT!
+            // REDIRECT KE URL ASLI
+            console.log(`Berhasil: Mengalihkan ${slug} ke ${data.originalUrl}`);
             return res.redirect(302, data.originalUrl);
         } else {
-            return res.status(404).send("Link Sekawan tidak ditemukan!");
+            // Jika slug tidak ada di database
+            console.log(`Gagal: Slug ${slug} tidak ditemukan`);
+            return res.status(404).send(`
+                <div style="text-align:center; padding:50px; font-family:sans-serif;">
+                    <h1>404 - Link Tidak Ketemu</h1>
+                    <p>Waduh, link <b>go.sekawan.my.id/${slug}</b> belum terdaftar di database kita.</p>
+                    <a href="https://go.sekawan.my.id">Balik ke Dashboard</a>
+                </div>
+            `);
         }
     } catch (error) {
-        return res.status(500).send("System Error");
+        console.error("System Error:", error);
+        return res.status(500).send("Ada masalah di server Sekawan.");
     }
 });
+    
