@@ -3,85 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SekawanURL | go.sekawan.com</title>
+    <title>Dashboard SekawanURL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-dark: #064e57;
-            --accent-teal: #14b8a6;
-        }
-        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .header-curve {
-            background-color: var(--primary-dark);
-            border-bottom-left-radius: 60px;
-            border-bottom-right-radius: 60px;
-        }
-        .card-sekawan {
-            border-radius: 40px;
-            background: white;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-        }
-        .input-sekawan { background-color: #f1f5f9; border-radius: 20px; }
-        .italic-black { font-weight: 900; font-style: italic; }
+        :root { --primary: #064e57; --accent: #14b8a6; }
+        body { background-color: #f1f5f9; font-family: sans-serif; }
+        .header-curve { background-color: var(--primary); border-bottom-left-radius: 60px; border-bottom-right-radius: 60px; }
+        .card-sekawan { border-radius: 40px; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="header-curve px-8 pt-12 pb-24 text-white relative">
-        <div class="flex items-center gap-3 mb-10">
-            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                <i class="fa-solid fa-link text-white text-xl"></i>
-            </div>
-            <h1 class="text-xl italic-black tracking-tighter uppercase">SekawanURL</h1>
-        </div>
-        
-        <div class="flex gap-2 overflow-x-auto">
-            <button class="bg-white/10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Dashboard</button>
-            <button class="bg-white/10 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Settings</button>
-            <button class="bg-teal-500 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">Sign Out</button>
-        </div>
+    <header class="header-curve px-8 pt-12 pb-24 text-white">
+        <h1 class="text-2xl font-black italic tracking-tighter uppercase">SekawanURL</h1>
+        <p class="text-teal-200 text-xs mt-1">Domain aktif: <b>go.sekawan.my.id</b></p>
     </header>
 
     <main class="max-w-md mx-auto px-4 -mt-16">
         <section class="card-sekawan p-8 mb-8 border border-white">
-            <h3 class="text-[10px] font-black text-teal-800 uppercase tracking-[0.2em] mb-6">Buat Link Baru</h3>
-            
+            <h3 class="text-[10px] font-black text-teal-800 uppercase tracking-widest mb-6">Create Link</h3>
             <div class="space-y-4">
-                <div class="input-sekawan p-4">
-                    <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Link Panjang</label>
-                    <input type="text" id="longUrl" placeholder="https://..." 
-                           class="w-full bg-transparent outline-none text-slate-700 font-bold text-sm">
-                </div>
-
-                <div class="input-sekawan p-4">
-                    <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Custom Slug</label>
-                    <input type="text" id="slug" placeholder="slug-unik" 
-                           class="w-full bg-transparent outline-none text-teal-700 font-black uppercase text-sm">
-                </div>
-                
-                <button onclick="createLink()" class="w-full bg-[#064e57] text-white py-5 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-teal-900/30 active:scale-95 transition-all">
-                    Shorten Link <i class="fa-solid fa-bolt ml-2 text-teal-400"></i>
+                <input type="text" id="longUrl" placeholder="URL Panjang (https://...)" class="w-full bg-slate-100 p-4 rounded-2xl outline-none font-bold text-sm">
+                <input type="text" id="slug" placeholder="Custom Slug" class="w-full bg-slate-100 p-4 rounded-2xl outline-none font-black text-teal-700 uppercase text-sm">
+                <button onclick="createLink()" class="w-full bg-[#064e57] text-white py-5 rounded-[22px] font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">
+                    Shorten Now <i class="fa-solid fa-bolt ml-2 text-teal-400"></i>
                 </button>
             </div>
         </section>
 
-        <div class="flex justify-between items-center px-6 mb-4">
-            <h3 class="text-[10px] font-black text-teal-900 uppercase tracking-widest">Riwayat Link</h3>
-            <span id="total-link-badge" class="bg-teal-100 text-teal-800 text-[10px] px-3 py-1 rounded-full font-black">0 LINKS</span>
-        </div>
-        
-        <div id="links-list" class="space-y-4">
-            <div class="text-center py-10 text-slate-400 text-xs italic">Memuat database...</div>
-        </div>
+        <div id="links-list" class="space-y-4"></div>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG KAMU
         const firebaseConfig = {
             apiKey: "AIzaSyB2VYtNIg88lJlCivVhWWHv3NVkYm5KQsw",
             authDomain: "link-sekawan.firebaseapp.com",
@@ -93,77 +50,38 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const MY_DOMAIN = "go.sekawan.my.id"; // <--- Domain
+        const DOMAIN = "go.sekawan.my.id";
 
-        // CREATE LINK
         window.createLink = async () => {
             const longUrl = document.getElementById('longUrl').value;
             const slug = document.getElementById('slug').value.trim().toLowerCase();
+            if (!longUrl || !slug) return alert("Isi semua field!");
 
-            if (!longUrl || !slug) {
-                alert("Lengkapi link dan slug-nya dulu, Bro!");
-                return;
-            }
-
-            try {
-                await setDoc(doc(db, "links", slug), {
-                    originalUrl: longUrl,
-                    slug: slug,
-                    clickCount: 0,
-                    createdAt: new Date()
-                });
-                document.getElementById('longUrl').value = '';
-                document.getElementById('slug').value = '';
-                alert("Success! Link siap disebar.");
-            } catch (e) {
-                alert("Error: " + e.message);
-            }
+            await setDoc(doc(db, "links", slug), {
+                originalUrl: longUrl, slug, clickCount: 0, createdAt: new Date()
+            });
+            alert("Berhasil!");
         };
 
-        // READ LIST REAL-TIME
-        const listContainer = document.getElementById('links-list');
-        const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
-
-        onSnapshot(q, (snapshot) => {
-            listContainer.innerHTML = '';
-            document.getElementById('total-link-badge').innerText = `${snapshot.size} LINKS`;
-            
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const card = `
-                    <div class="card-sekawan p-6 border border-slate-100 flex flex-col gap-4">
-                        <div>
-                            <p class="text-[9px] font-black text-teal-800 uppercase tracking-widest mb-1">Short link</p>
-                            <p class="text-teal-600 font-bold underline text-sm break-all">${MY_DOMAIN}/${data.slug}</p>
-                        </div>
-                        <div class="flex justify-between items-end border-t border-slate-50 pt-4">
-                            <div class="overflow-hidden pr-4">
-                                <p class="text-[9px] font-black text-slate-300 uppercase mb-1">Original URL</p>
-                                <p class="text-slate-400 text-[10px] truncate max-w-[180px]">${data.originalUrl}</p>
-                            </div>
-                            <div class="flex flex-col items-end gap-2">
-                                <p class="text-slate-800 text-[10px] font-black uppercase tracking-tighter italic">Clicks: ${data.clickCount || 0}</p>
-                                <div class="flex gap-2">
-                                    <button onclick="deleteLink('${data.slug}')" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-300 hover:text-red-500 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                                    <button onclick="copyToClipboard('${MY_DOMAIN}/${data.slug}')" class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 hover:bg-teal-600 hover:text-white transition"><i class="fa-solid fa-copy text-xs"></i></button>
-                                </div>
+        onSnapshot(query(collection(db, "links"), orderBy("createdAt", "desc")), (snap) => {
+            const list = document.getElementById('links-list');
+            list.innerHTML = '';
+            snap.forEach(d => {
+                const item = d.data();
+                list.innerHTML += `
+                    <div class="card-sekawan p-6 mb-4">
+                        <p class="text-[10px] font-black text-teal-800 uppercase">Short link</p>
+                        <p class="text-teal-600 font-bold underline mb-4">${DOMAIN}/${item.slug}</p>
+                        <div class="flex justify-between items-center border-t pt-4">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Clicks: ${item.clickCount || 0}</span>
+                            <div class="flex gap-2">
+                                <button onclick="deleteDoc(doc(db, 'links', '${item.slug}'))" class="text-slate-300"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="navigator.clipboard.writeText('${DOMAIN}/${item.slug}');alert('Copied!')" class="text-teal-600"><i class="fa-solid fa-copy"></i></button>
                             </div>
                         </div>
-                    </div>
-                `;
-                listContainer.innerHTML += card;
+                    </div>`;
             });
         });
-
-        // ACTIONS
-        window.deleteLink = async (slug) => {
-            if(confirm(`Hapus link /${slug}?`)) await deleteDoc(doc(db, "links", slug));
-        };
-
-        window.copyToClipboard = (text) => {
-            navigator.clipboard.writeText(text);
-            alert('Link disalin ke clipboard!');
-        };
     </script>
 </body>
 </html>
