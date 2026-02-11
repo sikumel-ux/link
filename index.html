@@ -68,6 +68,96 @@
             <div class="text-center py-10 text-slate-400 text-xs italic">Menunggu perintah...</div>
         </div>
     </main>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, doc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+  // Konfigurasi Firebase (Pakai punya kamu yang tadi)
+  const firebaseConfig = {
+    apiKey: "AIzaSyB2VYtNIg88lJlCivVhWWHv3NVkYm5KQsw",
+    authDomain: "link-sekawan.firebaseapp.com",
+    projectId: "link-sekawan",
+    storageBucket: "link-sekawan.firebasestorage.app",
+    messagingSenderId: "328194312526",
+    appId: "1:328194312526:web:f0b5ec493e823133ef761f"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // LOGIC TOMBOL SHORTEN
+  window.createLink = async () => {
+    const longUrl = document.getElementById('longUrl').value;
+    const slug = document.getElementById('slug').value.trim().toLowerCase();
+
+    if (!longUrl || !slug) {
+      alert("Waduh, isi dulu link sama slug-nya bos!");
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "links", slug), {
+        originalUrl: longUrl,
+        slug: slug,
+        clickCount: 0,
+        createdAt: new Date()
+      });
+      
+      // Reset input biar bersih
+      document.getElementById('longUrl').value = '';
+      document.getElementById('slug').value = '';
+      alert("Mantap! Link /" + slug + " berhasil dibuat.");
+    } catch (e) {
+      console.error("Gagal simpan:", e);
+      alert("Gagal: " + e.message);
+    }
+  };
+
+  // RENDER LIST SECARA REAL-TIME
+  const listContainer = document.getElementById('links-list');
+  const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
+
+  onSnapshot(q, (snapshot) => {
+    listContainer.innerHTML = '';
+    document.getElementById('total-link-badge').innerText = `${snapshot.size} Links`;
+    
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const card = `
+        <div class="card-sekawan p-6 border border-slate-100 mb-4 animate-fade-in">
+            <div class="mb-4">
+                <p class="text-[10px] font-black text-teal-800 uppercase mb-1">Short link</p>
+                <p class="text-teal-600 font-bold underline text-sm truncate">link-sekawan.web.app/${data.slug}</p>
+            </div>
+            <div class="flex justify-between items-end border-t border-slate-50 pt-4">
+                <div class="overflow-hidden pr-4">
+                   <p class="text-slate-400 text-[10px] uppercase font-black mb-1">Original URL</p>
+                   <p class="text-slate-500 text-[11px] truncate max-w-[180px]">${data.originalUrl}</p>
+                </div>
+                <div class="text-right flex flex-col items-end gap-2">
+                    <p class="text-slate-700 text-[10px] font-black uppercase">Click: ${data.clickCount || 0}</p>
+                    <div class="flex gap-2">
+                        <button onclick="deleteLink('${data.slug}')" class="text-slate-300 hover:text-red-500 transition"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                        <button onclick="copyToClipboard('link-sekawan.web.app/${data.slug}')" class="text-teal-500 hover:scale-110 transition"><i class="fa-solid fa-copy text-sm"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      `;
+      listContainer.innerHTML += card;
+    });
+  });
+
+  // FUNGSI COPY & DELETE
+  window.deleteLink = async (slug) => {
+    if(confirm('Hapus link ini?')) await deleteDoc(doc(db, "links", slug));
+  };
+
+  window.copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert('Link disalin!');
+  };
+      </script>
+    
     </body>
 </html>
