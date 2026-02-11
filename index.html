@@ -3,95 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SekawanURL | Teal Dashboard</title>
+    <title>SekawanURL | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-dark: #064e57; /* Teal gelap sesuai gambar */
-            --accent-teal: #14b8a6; /* Teal terang untuk tombol */
-            --bg-light: #f1f5f9;
+            --primary-dark: #064e57; /* Teal Gelap */
+            --accent-teal: #14b8a6; /* Teal Terang */
         }
-        body { background-color: var(--bg-light); font-family: 'Inter', sans-serif; }
+        body { background-color: #f1f5f9; }
         .header-curve {
             background-color: var(--primary-dark);
             border-bottom-left-radius: 60px;
             border-bottom-right-radius: 60px;
         }
         .card-sekawan {
-            border-radius: 45px;
+            border-radius: 40px;
             background: white;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-        }
-        .btn-teal { background-color: var(--accent-teal); }
-        .btn-dark { background-color: var(--primary-dark); }
-        .input-sekawan {
-            background-color: #f1f5f9;
-            border-radius: 20px;
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="header-curve px-8 pt-10 pb-20 text-white relative">
-        <div class="flex items-center gap-3 mb-10">
-            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-cube text-teal-800"></i>
+    <header class="header-curve px-8 pt-12 pb-24 text-white">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                <i class="fa-solid fa-link text-white"></i>
             </div>
-            <h1 class="text-xl font-bold italic tracking-tight italic">SekawanURL</h1>
+            <h1 class="text-2xl font-black italic tracking-tighter">SekawanURL</h1>
         </div>
-
-        <h2 class="text-3xl font-black italic mb-8">SekawanURL</h2>
-
-        <div class="flex gap-2 overflow-x-auto pb-4">
-            <button class="bg-white/10 px-6 py-2 rounded-full text-xs font-bold uppercase">Warga</button>
-            <button class="bg-white/10 px-6 py-2 rounded-full text-xs font-bold uppercase">Keuangan</button>
-            <button class="btn-teal px-6 py-2 rounded-full text-xs font-bold">Sign Out</button>
-        </div>
+        <p class="text-teal-100 text-sm opacity-80">Link pendek, urusan kelar.</p>
     </header>
 
-    <main class="max-w-md mx-auto px-4 -mt-12">
-        <section class="card-sekawan p-8 mb-8 border border-teal-50">
-            <h3 class="text-xs font-black text-teal-800 uppercase tracking-widest mb-6">Buat Link Baru</h3>
+    <main class="max-w-md mx-auto px-4 -mt-16">
+        <section class="card-sekawan p-8 mb-8 border border-white">
+            <h3 class="text-[10px] font-black text-teal-800 uppercase tracking-[0.2em] mb-6">Create New Link</h3>
             
             <div class="space-y-4">
-                <select class="w-full input-sekawan p-4 text-slate-700 font-bold appearance-none outline-none">
-                    <option>PILIH KATEGORI</option>
-                    <option>SENIN</option>
-                </select>
+                <div class="bg-slate-100 rounded-2xl p-4">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">URL Panjang</label>
+                    <input type="text" id="longUrl" placeholder="https://..." 
+                           class="w-full bg-transparent outline-none text-slate-700 font-bold">
+                </div>
 
-                <textarea id="longUrl" placeholder="Nama-nama Petugas / Link Panjang..." 
-                    class="w-full input-sekawan p-4 h-24 outline-none resize-none text-slate-500 font-medium"></textarea>
+                <div class="bg-slate-100 rounded-2xl p-4">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Custom Slug</label>
+                    <input type="text" id="slug" placeholder="misal: promo-kopi" 
+                           class="w-full bg-transparent outline-none text-teal-700 font-bold uppercase">
+                </div>
                 
-                <div class="flex justify-end -mt-12 pr-2">
-                    <span id="total-link-badge" class="btn-dark text-[10px] text-white px-3 py-1 rounded-md">Total: [X] Link</span>
-                </div>
-
-                <button onclick="createLink()" class="w-full btn-dark text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition">
-                    Update Petugas Ronda
+                <button onclick="createLink()" class="w-full bg-[#064e57] text-white py-5 rounded-[20px] font-black text-xs uppercase tracking-widest shadow-xl shadow-teal-900/20 active:scale-95 transition-all">
+                    Shorten Link <i class="fa-solid fa-bolt ml-2 text-teal-400"></i>
                 </button>
-
-                <div class="flex gap-2">
-                    <input type="text" id="slug" placeholder="Shorten" class="flex-grow border-2 border-teal-600 rounded-2xl p-3 text-sm font-bold text-teal-800 outline-none">
-                    <button class="bg-slate-100 p-4 rounded-2xl text-teal-800"><i class="fa-solid fa-trash"></i></button>
-                    <button class="btn-dark text-white p-4 rounded-2xl"><i class="fa-solid fa-share-nodes"></i></button>
-                </div>
             </div>
         </section>
 
-        <h3 class="text-xs font-black text-teal-800 uppercase tracking-widest mb-4 px-4">Riwayat Link</h3>
+        <div class="flex justify-between items-center px-4 mb-4">
+            <h3 class="text-[10px] font-black text-teal-900 uppercase tracking-widest">History</h3>
+            <span id="total-link-badge" class="bg-teal-100 text-teal-800 text-[10px] px-3 py-1 rounded-full font-bold">0 Links</span>
+        </div>
         
         <div id="links-list" class="space-y-4">
-            <div class="card-sekawan p-6 border border-slate-100">
-                <div class="mb-4">
-                    <p class="text-[10px] font-black text-teal-800 uppercase mb-1">Short link</p>
-                    <p class="text-teal-600 font-bold underline text-sm truncate">skwn.id/ronda-senin</p>
-                </div>
-                <div class="flex justify-between items-end border-t border-slate-50 pt-4">
-                    <p class="text-slate-400 text-xs truncate max-w-[150px]">https://maps.google.com/...</p>
-                    <p class="text-slate-400 text-[10px] font-bold">Click: 13</p>
-                </div>
-            </div>
+            <div class="text-center py-10 text-slate-400 text-xs italic">Menunggu perintah...</div>
         </div>
     </main>
 
