@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sekawan Shortener | Dashboard</title>
+    <title>Sekawan URL | Dashboard Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background: #f8fafc; }
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
-        .gradient-text {
+        .curve-bg {
             background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            border-bottom-left-radius: 80px;
+            border-bottom-right-radius: 80px;
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <div class="fixed top-0 left-0 w-full h-64 bg-gradient-to-br from-indigo-600 to-violet-700 -z-10 rounded-b-[50px] shadow-2xl"></div>
+    <div class="fixed top-0 left-0 w-full h-72 curve-bg -z-10 shadow-2xl"></div>
 
     <nav class="max-w-6xl mx-auto px-6 py-8 flex justify-between items-center text-white">
         <div class="flex items-center gap-2">
@@ -27,16 +27,15 @@
             </div>
             <h1 class="text-2xl font-bold tracking-tight">Sekawan<span class="opacity-80 font-light">URL</span></h1>
         </div>
-        <button class="glass border border-white/20 px-5 py-2 rounded-2xl text-sm font-medium hover:bg-white/20 transition-all">
-            Sign Out <i class="fa-solid fa-arrow-right-from-bracket ml-2"></i>
-        </button>
+        <div id="auth-status" class="text-sm font-medium">
+            </div>
     </nav>
 
     <main class="max-w-4xl mx-auto px-6 pb-20">
-        <section class="glass p-1 border border-white/40 rounded-[2.5rem] shadow-2xl mt-4">
-            <div class="bg-white rounded-[2.3rem] p-8 md:p-10">
-                <h2 class="text-2xl font-bold text-slate-800 mb-2">Punya Link Baru?</h2>
-                <p class="text-slate-500 mb-8 text-sm">Masukan link panjangmu dan buat jadi lebih pendek & keren.</p>
+        <section class="glass p-1 border border-white/40 rounded-[3rem] shadow-2xl mt-4">
+            <div class="bg-white rounded-[2.8rem] p-8 md:p-10">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Buat Link Baru</h2>
+                <p class="text-slate-500 mb-8 text-sm">Masukkan URL panjang dan tentukan slug unikmu.</p>
                 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="relative flex-grow group">
@@ -56,129 +55,112 @@
             </div>
         </section>
 
-        <div class="mt-16 flex items-center justify-between px-4">
-            <h3 class="text-xl font-bold text-white md:text-slate-800">Riwayat Link</h3>
-            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Total: 12 Link</span>
+        <div class="mt-16 flex items-center justify-between px-4 text-slate-800">
+            <h3 class="text-xl font-bold">Riwayat Link</h3>
+            <span id="total-link" class="bg-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold">0 Link</span>
         </div>
 
-        <section class="mt-6 space-y-4">
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-5 w-full md:w-auto">
-                    <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xl"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <h4 class="font-bold text-slate-800 text-lg">skwn.id/promo-kopi</h4>
-                        <p class="text-slate-400 text-xs truncate max-w-[250px]">https://shopee.co.id/flash-sale-kopi-senja-pagi</p>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
-                    <div class="text-center">
-                        <span class="block text-2xl font-black text-slate-800">452</span>
-                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Klik</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"><i class="fa-solid fa-trash text-sm"></i></button>
-                        <button class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition"><i class="fa-solid fa-copy text-sm"></i></button>
-                    </div>
-                </div>
-            </div>
-            </section>
+        <section id="links-list" class="mt-6 space-y-4">
+            <div class="text-center py-10 text-slate-400 italic">Memuat data...</div>
+        </section>
     </main>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, doc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // 1. Konfigurasi Firebase (Ganti dengan config dari Firebase Console kamu)
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+        // CONFIG KAMU (Link-Sekawan)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2VYtNIg88lJlCivVhWWHv3NVkYm5KQsw",
+            authDomain: "link-sekawan.firebaseapp.com",
+            projectId: "link-sekawan",
+            storageBucket: "link-sekawan.firebasestorage.app",
+            messagingSenderId: "328194312526",
+            appId: "1:328194312526:web:f0b5ec493e823133ef761f"
+        };
 
-  // 2. Fungsi untuk Membuat Link Baru
-  window.createLink = async () => {
-    const longUrl = document.getElementById('longUrl').value;
-    const slug = document.getElementById('slug').value;
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    if (!longUrl || !slug) {
-      alert("Isi dulu dong link dan slug-nya!");
-      return;
-    }
+        // Fungsi Simpan Link
+        window.createLink = async () => {
+            const longUrl = document.getElementById('longUrl').value;
+            const slug = document.getElementById('slug').value;
 
-    try {
-      await setDoc(doc(db, "links", slug), {
-        originalUrl: longUrl,
-        slug: slug,
-        clickCount: 0,
-        createdAt: new Date()
-      });
-      
-      // Reset input
-      document.getElementById('longUrl').value = '';
-      document.getElementById('slug').value = '';
-      alert("Link berhasil dibuat! Gas pol!");
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
-  };
+            if (!longUrl || !slug) {
+                alert("Waduh, isi dulu link sama slug-nya bos!");
+                return;
+            }
 
-  // 3. Render Data secara Real-time
-  const linksContainer = document.querySelector('section.mt-6');
-  const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
+            try {
+                await setDoc(doc(db, "links", slug), {
+                    originalUrl: longUrl,
+                    slug: slug,
+                    clickCount: 0,
+                    createdAt: new Date()
+                });
+                document.getElementById('longUrl').value = '';
+                document.getElementById('slug').value = '';
+                alert("Mantap! Link berhasil dibuat.");
+            } catch (e) {
+                console.error("Gagal simpan:", e);
+                alert("Gagal: " + e.message);
+            }
+        };
 
-  onSnapshot(q, (snapshot) => {
-    linksContainer.innerHTML = ''; // Clear container
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      const card = `
-        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-            <div class="flex items-center gap-5 w-full md:w-auto">
-                <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                    <i class="fa-solid fa-link text-xl"></i>
-                </div>
-                <div class="overflow-hidden text-left">
-                    <h4 class="font-bold text-slate-800 text-lg">skwn.id/${data.slug}</h4>
-                    <p class="text-slate-400 text-xs truncate max-w-[250px]">${data.originalUrl}</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
-                <div class="text-center">
-                    <span class="block text-2xl font-black text-slate-800">${data.clickCount || 0}</span>
-                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Klik</span>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="deleteLink('${data.slug}')" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"><i class="fa-solid fa-trash text-sm"></i></button>
-                    <button onclick="copyToClipboard('skwn.id/${data.slug}')" class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition"><i class="fa-solid fa-copy text-sm"></i></button>
-                </div>
-            </div>
-        </div>
-      `;
-      linksContainer.innerHTML += card;
-    });
-  });
+        // Render Data Real-time
+        const listContainer = document.getElementById('links-list');
+        const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
 
-  // Fungsi Pembantu: Hapus & Copy
-  window.deleteLink = async (slug) => {
-    if(confirm('Yakin mau hapus link ini?')) {
-        await deleteDoc(doc(db, "links", slug));
-    }
-  };
+        onSnapshot(q, (snapshot) => {
+            listContainer.innerHTML = '';
+            document.getElementById('total-link').innerText = `${snapshot.size} Link`;
+            
+            if (snapshot.empty) {
+                listContainer.innerHTML = '<div class="text-center py-10 text-slate-400 italic">Belum ada link. Yuk bikin satu!</div>';
+            }
 
-  window.copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    alert('Link disalin!');
-  };
-            </script>
-    
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const card = `
+                    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center gap-5 w-full md:w-auto">
+                            <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                                <i class="fa-solid fa-link text-xl"></i>
+                            </div>
+                            <div class="overflow-hidden text-left">
+                                <h4 class="font-bold text-slate-800 text-lg">link-sekawan.web.app/${data.slug}</h4>
+                                <p class="text-slate-400 text-xs truncate max-w-[250px]">${data.originalUrl}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
+                            <div class="text-center">
+                                <span class="block text-2xl font-black text-slate-800">${data.clickCount || 0}</span>
+                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest text-center">Klik</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="deleteLink('${data.slug}')" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"><i class="fa-solid fa-trash text-sm"></i></button>
+                                <button onclick="copyToClipboard('link-sekawan.web.app/${data.slug}')" class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition"><i class="fa-solid fa-copy text-sm"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listContainer.innerHTML += card;
+            });
+        });
+
+        // Hapus Link
+        window.deleteLink = async (slug) => {
+            if(confirm(`Hapus link /${slug}?`)) {
+                await deleteDoc(doc(db, "links", slug));
+            }
+        };
+
+        // Copy Link
+        window.copyToClipboard = (text) => {
+            navigator.clipboard.writeText(text);
+            alert('Link disalin ke clipboard!');
+        };
+    </script>
 </body>
-  </html>
-  
+</html>
