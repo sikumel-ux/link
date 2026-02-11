@@ -86,7 +86,99 @@
             </div>
             </section>
     </main>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, doc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+  // 1. Konfigurasi Firebase (Ganti dengan config dari Firebase Console kamu)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 2. Fungsi untuk Membuat Link Baru
+  window.createLink = async () => {
+    const longUrl = document.getElementById('longUrl').value;
+    const slug = document.getElementById('slug').value;
+
+    if (!longUrl || !slug) {
+      alert("Isi dulu dong link dan slug-nya!");
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "links", slug), {
+        originalUrl: longUrl,
+        slug: slug,
+        clickCount: 0,
+        createdAt: new Date()
+      });
+      
+      // Reset input
+      document.getElementById('longUrl').value = '';
+      document.getElementById('slug').value = '';
+      alert("Link berhasil dibuat! Gas pol!");
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  };
+
+  // 3. Render Data secara Real-time
+  const linksContainer = document.querySelector('section.mt-6');
+  const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
+
+  onSnapshot(q, (snapshot) => {
+    linksContainer.innerHTML = ''; // Clear container
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const card = `
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+            <div class="flex items-center gap-5 w-full md:w-auto">
+                <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                    <i class="fa-solid fa-link text-xl"></i>
+                </div>
+                <div class="overflow-hidden text-left">
+                    <h4 class="font-bold text-slate-800 text-lg">skwn.id/${data.slug}</h4>
+                    <p class="text-slate-400 text-xs truncate max-w-[250px]">${data.originalUrl}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
+                <div class="text-center">
+                    <span class="block text-2xl font-black text-slate-800">${data.clickCount || 0}</span>
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Klik</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="deleteLink('${data.slug}')" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"><i class="fa-solid fa-trash text-sm"></i></button>
+                    <button onclick="copyToClipboard('skwn.id/${data.slug}')" class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition"><i class="fa-solid fa-copy text-sm"></i></button>
+                </div>
+            </div>
+        </div>
+      `;
+      linksContainer.innerHTML += card;
+    });
+  });
+
+  // Fungsi Pembantu: Hapus & Copy
+  window.deleteLink = async (slug) => {
+    if(confirm('Yakin mau hapus link ini?')) {
+        await deleteDoc(doc(db, "links", slug));
+    }
+  };
+
+  window.copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert('Link disalin!');
+  };
+            </script>
+    
 </body>
   </html>
   
