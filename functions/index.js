@@ -3,12 +3,12 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 exports.redirect = functions.https.onRequest(async (req, res) => {
-    // Ambil slug dari parameter atau path
-    const slug = req.params.slug || req.path.split('/').filter(Boolean)[0];
+    // Ambil slug (contoh: 'logo' dari go.sekawan.com/logo)
+    const slug = req.path.split('/').filter(Boolean)[0];
 
-    // Jika user cuma buka domain utama tanpa slug
-    if (!slug || slug === 'index.html' || slug === 'dashboard') {
-        return res.redirect('https://go.sekawan.my.id'); 
+    // Jika tidak ada slug atau mengakses index, jangan lanjut
+    if (!slug || slug === 'index.html') {
+        return res.redirect('https://go.sekawan.my.id');
     }
 
     try {
@@ -18,28 +18,25 @@ exports.redirect = functions.https.onRequest(async (req, res) => {
         if (doc.exists) {
             const data = doc.data();
             
-            // Catat Klik di Background (async)
+            // Update jumlah klik di background
             doc.ref.update({
                 clickCount: admin.firestore.FieldValue.increment(1)
-            }).catch(err => console.error("Update click failed", err));
+            }).catch(e => console.error("Click update failed", e));
 
-            // REDIRECT KE URL ASLI
-            console.log(`Berhasil: Mengalihkan ${slug} ke ${data.originalUrl}`);
+            // Redirect ke URL tujuan
             return res.redirect(302, data.originalUrl);
         } else {
             // Jika slug tidak ada di database
-            console.log(`Gagal: Slug ${slug} tidak ditemukan`);
             return res.status(404).send(`
                 <div style="text-align:center; padding:50px; font-family:sans-serif;">
-                    <h1>404 - Link Tidak Ketemu</h1>
-                    <p>Waduh, link <b>go.sekawan.my.id/${slug}</b> belum terdaftar di database kita.</p>
-                    <a href="https://go.sekawan.my.id">Balik ke Dashboard</a>
+                    <h1 style="color:#064e57">404 - Link Tidak Ditemukan</h1>
+                    <p>Link <b>go.sekawan.com/${slug}</b> belum terdaftar.</p>
+                    <a href="https://go.sekawan.my.id" style="color:#14b8a6">Buka Dashboard</a>
                 </div>
             `);
         }
     } catch (error) {
-        console.error("System Error:", error);
-        return res.status(500).send("Ada masalah di server Sekawan.");
+        console.error("Error redirecting:", error);
+        return res.status(500).send("Terjadi kesalahan sistem.");
     }
 });
-    
