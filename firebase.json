@@ -8,12 +8,12 @@
     ],
     "rewrites": [
       {
-        "source": "/:slug",
-        "function": "redirect"
+        "source": "/",
+        "destination": "/index.html"
       },
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/:slug",
+        "function": "redirect"
       }
     ]
   },
